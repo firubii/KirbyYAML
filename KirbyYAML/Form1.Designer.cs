@@ -41,8 +41,8 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.type = new System.Windows.Forms.ComboBox();
-            this.addItem = new System.Windows.Forms.Button();
-            this.delItem = new System.Windows.Forms.Button();
+            this.expand = new System.Windows.Forms.Button();
+            this.collapse = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -165,31 +165,33 @@
             this.type.Size = new System.Drawing.Size(206, 21);
             this.type.TabIndex = 9;
             // 
-            // addItem
+            // expand
             // 
-            this.addItem.Location = new System.Drawing.Point(51, 442);
-            this.addItem.Name = "addItem";
-            this.addItem.Size = new System.Drawing.Size(75, 23);
-            this.addItem.TabIndex = 10;
-            this.addItem.Text = "Add Item";
-            this.addItem.UseVisualStyleBackColor = true;
+            this.expand.Location = new System.Drawing.Point(51, 442);
+            this.expand.Name = "expand";
+            this.expand.Size = new System.Drawing.Size(75, 23);
+            this.expand.TabIndex = 10;
+            this.expand.Text = "Expand All";
+            this.expand.UseVisualStyleBackColor = true;
+            this.expand.Click += new System.EventHandler(this.expand_Click);
             // 
-            // delItem
+            // collapse
             // 
-            this.delItem.Location = new System.Drawing.Point(132, 442);
-            this.delItem.Name = "delItem";
-            this.delItem.Size = new System.Drawing.Size(75, 23);
-            this.delItem.TabIndex = 11;
-            this.delItem.Text = "Delete Item";
-            this.delItem.UseVisualStyleBackColor = true;
+            this.collapse.Location = new System.Drawing.Point(132, 442);
+            this.collapse.Name = "collapse";
+            this.collapse.Size = new System.Drawing.Size(75, 23);
+            this.collapse.TabIndex = 11;
+            this.collapse.Text = "Collapse All";
+            this.collapse.UseVisualStyleBackColor = true;
+            this.collapse.Click += new System.EventHandler(this.collapse_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(475, 477);
-            this.Controls.Add(this.delItem);
-            this.Controls.Add(this.addItem);
+            this.Controls.Add(this.collapse);
+            this.Controls.Add(this.expand);
             this.Controls.Add(this.type);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -226,8 +228,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox type;
-        private System.Windows.Forms.Button addItem;
-        private System.Windows.Forms.Button delItem;
+        private System.Windows.Forms.Button expand;
+        private System.Windows.Forms.Button collapse;
     }
 }
 

@@ -75,7 +75,7 @@ namespace KirbyYAML
             {
                 TreeNode child = new TreeNode();
                 child.Name = types[BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset))];
-                child.Text = "" + i;
+                child.Text = "Entry " + i;
                 if (child.Name == "Int")
                 {
                     child.Tag = BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4).ToString();
@@ -133,6 +133,9 @@ namespace KirbyYAML
                         this.Enabled = false;
                         this.Cursor = Cursors.WaitCursor;
                         this.Text = "KirbyYAML - Reading File...";
+                        name.Text = "";
+                        value.Text = "";
+                        type.Text = "";
                         for (int i = 0; i < BitConverter.ToInt32(file, 0x20); i++)
                         {
                             TreeNode node = new TreeNode();
@@ -172,6 +175,25 @@ namespace KirbyYAML
                         this.Cursor = Cursors.Default;
                         this.Text = "KirbyYAML - " + open.FileName.Split('\\').Last();
                     }
+                    if (BitConverter.ToUInt32(file, 0x1C) == 6)
+                    {
+                        this.Enabled = false;
+                        this.Cursor = Cursors.WaitCursor;
+                        this.Text = "KirbyYAML - Loading File...";
+                        name.Text = "";
+                        value.Text = "";
+                        type.Text = "";
+                        TreeNode node = new TreeNode();
+                        node.Name = types[6];
+                        node.Text = "Root List";
+                        node.Tag = "<Collection>";
+                        node = ReadList(node, file, 0x1C);
+                        itemList.Nodes.Add(node);
+                        itemList.ExpandAll();
+                        this.Enabled = true;
+                        this.Cursor = Cursors.Default;
+                        this.Text = "KirbyYAML - " + open.FileName.Split('\\').Last();
+                    }
                 }
             }
         }
@@ -199,6 +221,16 @@ namespace KirbyYAML
             name.Text = itemList.SelectedNode.Text;
             value.Text = (string)itemList.SelectedNode.Tag;
             type.Text = itemList.SelectedNode.Name;
+        }
+
+        private void expand_Click(object sender, EventArgs e)
+        {
+            itemList.ExpandAll();
+        }
+
+        private void collapse_Click(object sender, EventArgs e)
+        {
+            itemList.CollapseAll();
         }
     }
 }

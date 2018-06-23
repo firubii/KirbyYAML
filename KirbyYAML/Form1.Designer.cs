@@ -82,6 +82,7 @@
             this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
             this.saveToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.saveToolStripMenuItem.Text = "Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
             // 
             // saveAsToolStripMenuItem
             // 
@@ -90,6 +91,7 @@
             | System.Windows.Forms.Keys.S)));
             this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(195, 22);
             this.saveAsToolStripMenuItem.Text = "Save As...";
+            this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // label1
             // 
@@ -123,6 +125,7 @@
             this.name.Name = "name";
             this.name.Size = new System.Drawing.Size(207, 20);
             this.name.TabIndex = 5;
+            this.name.TextChanged += new System.EventHandler(this.name_TextChanged);
             // 
             // value
             // 
@@ -130,6 +133,7 @@
             this.value.Name = "value";
             this.value.Size = new System.Drawing.Size(207, 20);
             this.value.TabIndex = 6;
+            this.value.TextChanged += new System.EventHandler(this.value_TextChanged);
             // 
             // label3
             // 
@@ -164,6 +168,7 @@
             this.type.Name = "type";
             this.type.Size = new System.Drawing.Size(206, 21);
             this.type.TabIndex = 9;
+            this.type.SelectedIndexChanged += new System.EventHandler(this.type_SelectedIndexChanged);
             // 
             // expand
             // 
@@ -187,6 +192,7 @@
             // 
             // Form1
             // 
+            this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(475, 477);
@@ -201,11 +207,14 @@
             this.Controls.Add(this.itemList);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.menuStrip1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "KirbyYAML";
+            this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
+            this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);

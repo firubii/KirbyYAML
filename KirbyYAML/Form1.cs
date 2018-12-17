@@ -245,6 +245,7 @@ namespace KirbyYAML
                     this.Text = "KirbyYAML - " + filePath.Split('\\').Last();
                 }
             }
+            reader.Dispose();
             itemList.EndUpdate();
         }
         

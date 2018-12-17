@@ -53,6 +53,7 @@ namespace KirbyYAML
                     uint valtype = reader.ReadUInt32();
                     node.Text = name;
                     node.Name = types[(int)valtype];
+                    Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                     switch (valtype)
                     {
                         case 1:
@@ -100,6 +101,7 @@ namespace KirbyYAML
                     uint valtype = reader.ReadUInt32();
                     node.Text = "Entry " + i;
                     node.Name = types[(int)valtype];
+                    Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                     switch (valtype)
                     {
                         case 1:
@@ -180,8 +182,8 @@ namespace KirbyYAML
                         reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
                         uint valtype = reader.ReadUInt32();
                         node.Text = name;
-                        Console.WriteLine($"{valtype} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                         node.Name = types[(int)valtype];
+                        Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                         switch (valtype)
                         {
                             case 1:
@@ -270,7 +272,6 @@ namespace KirbyYAML
             }
 
             writer.Write(listType);
-            writer.Write(itemList.Nodes.Count);
 
             stringOffsets = new List<uint>();
             strings = new List<string>();
@@ -280,6 +281,7 @@ namespace KirbyYAML
             Console.WriteLine("Reading nodes");
             if (listType == 5)
             {
+                writer.Write(itemList.Nodes.Count);
                 uint pos = (uint)writer.BaseStream.Position;
                 for (int i = 0; i < itemList.Nodes.Count; i++)
                 {
@@ -299,10 +301,11 @@ namespace KirbyYAML
             }
             else if (listType == 6)
             {
+                writer.Write(itemList.Nodes[0].Nodes.Count);
                 uint pos = (uint)writer.BaseStream.Position;
                 for (int i = 0; i < itemList.Nodes[0].Nodes.Count; i++)
                 {
-                    writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                    writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
                 }
                 for (int i = 0; i < itemList.Nodes[0].Nodes.Count; i++)
                 {
@@ -310,7 +313,7 @@ namespace KirbyYAML
                     valuePointers.Add((uint)writer.BaseStream.Position);
                     writer.BaseStream.Seek(0x4, SeekOrigin.Current);
                     pos = (uint)writer.BaseStream.Position;
-                    SaveYAMLNode(writer, itemList.Nodes[i]);
+                    SaveYAMLNode(writer, itemList.Nodes[0].Nodes[i]);
                 }
             }
 
@@ -345,7 +348,7 @@ namespace KirbyYAML
             writer.Write(Encoding.UTF8.GetBytes("RLOC".ToCharArray()));
             writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
             writer.BaseStream.Seek(0x8, SeekOrigin.Begin);
-            writer.Write(rlocPos);
+            writer.Write(rlocPos - 1);
             writer.BaseStream.Seek(0x10, SeekOrigin.Begin);
             writer.Write(rlocPos);
 
@@ -391,6 +394,7 @@ namespace KirbyYAML
                 case "String":
                     {
                         writer.Write(4);
+                        strings.Add(node.Tag.ToString());
                         stringOffsets.Add((uint)writer.BaseStream.Position);
                         writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
                         break;

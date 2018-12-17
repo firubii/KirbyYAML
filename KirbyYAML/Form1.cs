@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Threading;
 
 namespace KirbyYAML
 {
@@ -30,84 +31,110 @@ namespace KirbyYAML
             {6, "List"},
         };
 
-        public TreeNode ReadDictionary(TreeNode node, byte[] file, int offset)
+        public TreeNode[] ReadYAML(BinaryReader reader, uint type)
         {
-            int currentItemOffset = 0x0;
-            for (int i = 0; i < BitConverter.ToInt32(file, offset + 0x4); i++)
+            List<TreeNode> nodes = new List<TreeNode>();
+            List<uint> stringOffsets = new List<uint>();
+            List<uint> valueOffsets = new List<uint>();
+            uint count = reader.ReadUInt32();
+            if (type == 5)
             {
-                TreeNode child = new TreeNode();
-                child.Name = types[BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset))];
-                child.Text = Encoding.UTF8.GetString(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4, BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset)));
-                if (child.Name == "Int")
+                for (int i = 0; i < count; i++)
                 {
-                    child.Tag = BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset) + 0x4).ToString();
+                    stringOffsets.Add(reader.ReadUInt32());
+                    valueOffsets.Add(reader.ReadUInt32());
                 }
-                if (child.Name == "Float")
+                for (int i = 0; i < count; i++)
                 {
-                    child.Tag = BitConverter.ToSingle(file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset) + 0x4).ToString();
+                    TreeNode node = new TreeNode();
+                    reader.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
+                    string name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
+                    reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
+                    uint valtype = reader.ReadUInt32();
+                    node.Text = name;
+                    node.Name = types[(int)valtype];
+                    switch (valtype)
+                    {
+                        case 1:
+                            {
+                                node.Tag = reader.ReadUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                node.Tag = reader.ReadSingle();
+                                break;
+                            }
+                        case 3:
+                            {
+                                node.Tag = reader.ReadBoolean();
+                                break;
+                            }
+                        case 4:
+                            {
+                                reader.BaseStream.Seek(reader.ReadUInt32(), SeekOrigin.Begin);
+                                node.Tag = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
+                                break;
+                            }
+                        case 5:
+                        case 6:
+                            {
+                                node.Tag = "<Collection>";
+                                node.Nodes.AddRange(ReadYAML(reader, valtype));
+                                break;
+                            }
+                    }
+                    nodes.Add(node);
                 }
-                if (child.Name == "Bool")
-                {
-                    child.Tag = Convert.ToBoolean(BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset) + 0x4)).ToString();
-                }
-                if (child.Name == "String")
-                {
-                    child.Tag = Encoding.UTF8.GetString(file, BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset) + 0x4) + 0x4, BitConverter.ToInt32(file, BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset) + 0x4)));
-                }
-                if (child.Name == "Dictionary")
-                {
-                    child.Tag = "<Collection>";
-                    child = ReadDictionary(child, file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset));
-                }
-                if (child.Name == "List")
-                {
-                    child.Tag = "<Collection>";
-                    child = ReadList(child, file, BitConverter.ToInt32(file, offset + 0xC + currentItemOffset));
-                }
-                node.Nodes.Add(child);
-                currentItemOffset += 0x8;
             }
-            return node;
-        }
-
-        public TreeNode ReadList(TreeNode node, byte[] file, int offset)
-        {
-            int currentItemOffset = 0x0;
-            for (int i = 0; i < BitConverter.ToInt32(file, offset + 0x4); i++)
+            else if (type == 6)
             {
-                TreeNode child = new TreeNode();
-                child.Name = types[BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset))];
-                child.Text = "Entry " + i;
-                if (child.Name == "Int")
+                for (int i = 0; i < count; i++)
                 {
-                    child.Tag = BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4).ToString();
+                    valueOffsets.Add(reader.ReadUInt32());
                 }
-                if (child.Name == "Float")
+                for (int i = 0; i < count; i++)
                 {
-                    child.Tag = BitConverter.ToSingle(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4).ToString();
+                    TreeNode node = new TreeNode();
+                    reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
+                    uint valtype = reader.ReadUInt32();
+                    node.Text = "Entry " + i;
+                    node.Name = types[(int)valtype];
+                    switch (valtype)
+                    {
+                        case 1:
+                            {
+                                node.Tag = reader.ReadUInt32();
+                                break;
+                            }
+                        case 2:
+                            {
+                                node.Tag = reader.ReadSingle();
+                                break;
+                            }
+                        case 3:
+                            {
+                                node.Tag = reader.ReadBoolean();
+                                break;
+                            }
+                        case 4:
+                            {
+                                reader.BaseStream.Seek(reader.ReadUInt32(), SeekOrigin.Begin);
+                                node.Tag = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
+                                break;
+                            }
+                        case 5:
+                        case 6:
+                            {
+                                node.Tag = "<Collection>";
+                                node.Nodes.AddRange(ReadYAML(reader, valtype));
+                                break;
+                            }
+                    }
+                    nodes.Add(node);
                 }
-                if (child.Name == "Bool")
-                {
-                    child.Tag = Convert.ToBoolean(BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4)).ToString();
-                }
-                if (child.Name == "String")
-                {
-                    child.Tag = Encoding.UTF8.GetString(file, BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4) + 0x4, BitConverter.ToInt32(file, BitConverter.ToInt32(file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset) + 0x4)));
-                }
-                if (child.Name == "Dictionary")
-                {
-                    child.Tag = "<Collection>";
-                    child = ReadDictionary(child, file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset));
-                }
-                if (child.Name == "List")
-                {
-                    child.Tag = "<Collection>";
-                    child = ReadList(child, file, BitConverter.ToInt32(file, offset + 0x8 + currentItemOffset));
-                }
-                node.Nodes.Add(child);
-                currentItemOffset += 0x4;
             }
-            return node;
+            return nodes.ToArray();
         }
 
         public void OpenYAML()
@@ -116,62 +143,84 @@ namespace KirbyYAML
             value.Text = "";
             type.Text = "";
             itemList.Nodes.Clear();
-            byte[] file = File.ReadAllBytes(filePath);
-            if (Encoding.UTF8.GetString(file, 0, 4) == "XBIN")
+            itemList.BeginUpdate();
+            BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open));
+            if (Encoding.UTF8.GetString(reader.ReadBytes(4)) == "XBIN")
             {
-                if (BitConverter.ToUInt32(file, 0x1C) == 5)
+                reader.BaseStream.Seek(0x1C, SeekOrigin.Begin);
+                uint listType = reader.ReadUInt32();
+                if (listType == 5)
                 {
                     //For nodes:
                     //Name = data type
                     //Text = value name
                     //Tag = value
-                    int offset = 0x0;
                     this.Enabled = false;
                     this.Cursor = Cursors.WaitCursor;
                     this.Text = "KirbyYAML - Reading File...";
                     name.Text = "";
                     value.Text = "";
                     type.Text = "";
-                    for (int i = 0; i < BitConverter.ToInt32(file, 0x20); i++)
+
+                    List<uint> stringOffsets = new List<uint>();
+                    List<uint> valueOffsets = new List<uint>();
+
+                    uint count = reader.ReadUInt32();
+                    for (int i = 0; i < count; i++)
+                    {
+                        stringOffsets.Add(reader.ReadUInt32());
+                        valueOffsets.Add(reader.ReadUInt32());
+                    }
+                    for (int i = 0; i < count; i++)
                     {
                         TreeNode node = new TreeNode();
-                        node.Name = types[BitConverter.ToInt32(file, BitConverter.ToInt32(file, 0x28 + offset))];
-                        node.Text = Encoding.UTF8.GetString(file, BitConverter.ToInt32(file, 0x24 + offset) + 0x4, BitConverter.ToInt32(file, BitConverter.ToInt32(file, 0x24 + offset)));
-                        if (node.Name == "Int")
+
+                        reader.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
+                        string name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
+                        reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
+                        uint valtype = reader.ReadUInt32();
+                        node.Text = name;
+                        Console.WriteLine($"{valtype} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
+                        node.Name = types[(int)valtype];
+                        switch (valtype)
                         {
-                            node.Tag = BitConverter.ToInt32(file, BitConverter.ToInt32(file, 0x28 + offset) + 0x4).ToString();
-                        }
-                        if (node.Name == "Float")
-                        {
-                            node.Tag = BitConverter.ToSingle(file, BitConverter.ToInt32(file, 0x28 + offset) + 0x4).ToString();
-                        }
-                        if (node.Name == "Bool")
-                        {
-                            node.Tag = Convert.ToBoolean(BitConverter.ToInt32(file, BitConverter.ToInt32(file, 0x28 + offset) + 0x4)).ToString();
-                        }
-                        if (node.Name == "String")
-                        {
-                            node.Tag = Encoding.UTF8.GetString(file, BitConverter.ToInt32(file, BitConverter.ToInt32(file, 0x28 + offset) + 0x4) + 0x4, BitConverter.ToInt32(file, BitConverter.ToInt32(file, BitConverter.ToInt32(file, 0x28 + offset) + 0x4)));
-                        }
-                        if (node.Name == "Dictionary")
-                        {
-                            node.Tag = "<Collection>";
-                            node = ReadDictionary(node, file, BitConverter.ToInt32(file, 0x28 + offset));
-                        }
-                        if (node.Name == "List")
-                        {
-                            node.Tag = "<Collection>";
-                            node = ReadList(node, file, BitConverter.ToInt32(file, 0x28 + offset));
+                            case 1:
+                                {
+                                    node.Tag = reader.ReadUInt32();
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    node.Tag = reader.ReadSingle();
+                                    break;
+                                }
+                            case 3:
+                                {
+                                    node.Tag = reader.ReadBoolean();
+                                    break;
+                                }
+                            case 4:
+                                {
+                                    reader.BaseStream.Seek(reader.ReadUInt32(), SeekOrigin.Begin);
+                                    node.Tag = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
+                                    break;
+                                }
+                            case 5:
+                            case 6:
+                                {
+                                    node.Tag = "<Collection>";
+                                    node.Nodes.AddRange(ReadYAML(reader, valtype));
+                                    break;
+                                }
                         }
                         itemList.Nodes.Add(node);
-                        offset += 0x8;
                     }
-                    itemList.ExpandAll();
+                    itemList.CollapseAll();
                     this.Enabled = true;
                     this.Cursor = Cursors.Default;
                     this.Text = "KirbyYAML - " + filePath.Split('\\').Last();
                 }
-                if (BitConverter.ToUInt32(file, 0x1C) == 6)
+                if (listType == 6)
                 {
                     this.Enabled = false;
                     this.Cursor = Cursors.WaitCursor;
@@ -179,38 +228,215 @@ namespace KirbyYAML
                     name.Text = "";
                     value.Text = "";
                     type.Text = "";
+
                     TreeNode node = new TreeNode();
                     node.Name = types[6];
                     node.Text = "Root List";
                     node.Tag = "<Collection>";
-                    node = ReadList(node, file, 0x1C);
+
+                    node.Nodes.AddRange(ReadYAML(reader, 6));
+
                     itemList.Nodes.Add(node);
-                    itemList.ExpandAll();
+                    itemList.CollapseAll();
                     this.Enabled = true;
                     this.Cursor = Cursors.Default;
                     this.Text = "KirbyYAML - " + filePath.Split('\\').Last();
                 }
             }
+            itemList.EndUpdate();
         }
+        
+        List<uint> stringOffsets = new List<uint>();
+        List<string> strings = new List<string>();
+        List<uint> valuePointers = new List<uint>();
+        List<uint> valueOffsets = new List<uint>();
+
 
         public void SaveYAML()
         {
             this.Enabled = false;
             this.Text = "KirbyYAML - Saving file...";
             this.Cursor = Cursors.WaitCursor;
-            List<byte> file = new List<byte>()
-            {
+
+            BinaryWriter writer = new BinaryWriter(new FileStream(filePath, FileMode.Create));
+            writer.Write(new byte[] {
                 0x58, 0x42, 0x49, 0x4E, 0x34, 0x12, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE9, 0xFD, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00
-            };
-            file.AddRange(BitConverter.GetBytes(itemList.Nodes.Count));
-            for (int i = 0; i < itemList.Nodes.Count; i++)
+                0x00, 0x00, 0x00, 0x00, 0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00 });
+
+            int listType = 5;
+            if (itemList.Nodes[0].Text == "Root List")
             {
-                //how the fuck am i going to save the file? the structure is far too complicated
+                listType = 6;
             }
+
+            writer.Write(listType);
+            writer.Write(itemList.Nodes.Count);
+
+            stringOffsets = new List<uint>();
+            strings = new List<string>();
+            valuePointers = new List<uint>();
+            valueOffsets = new List<uint>();
+
+            Console.WriteLine("Reading nodes");
+            if (listType == 5)
+            {
+                uint pos = (uint)writer.BaseStream.Position;
+                for (int i = 0; i < itemList.Nodes.Count; i++)
+                {
+                    writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                }
+                for (int i = 0; i < itemList.Nodes.Count; i++)
+                {
+                    writer.BaseStream.Seek(pos, SeekOrigin.Begin);
+                    strings.Add(itemList.Nodes[i].Text);
+                    stringOffsets.Add((uint)writer.BaseStream.Position);
+                    writer.BaseStream.Seek(0x4, SeekOrigin.Current);
+                    valuePointers.Add((uint)writer.BaseStream.Position);
+                    writer.BaseStream.Seek(0x4, SeekOrigin.Current);
+                    pos = (uint)writer.BaseStream.Position;
+                    SaveYAMLNode(writer, itemList.Nodes[i]);
+                }
+            }
+            else if (listType == 6)
+            {
+                uint pos = (uint)writer.BaseStream.Position;
+                for (int i = 0; i < itemList.Nodes[0].Nodes.Count; i++)
+                {
+                    writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                }
+                for (int i = 0; i < itemList.Nodes[0].Nodes.Count; i++)
+                {
+                    writer.BaseStream.Seek(pos, SeekOrigin.Begin);
+                    valuePointers.Add((uint)writer.BaseStream.Position);
+                    writer.BaseStream.Seek(0x4, SeekOrigin.Current);
+                    pos = (uint)writer.BaseStream.Position;
+                    SaveYAMLNode(writer, itemList.Nodes[i]);
+                }
+            }
+
+            Console.WriteLine("Inserting string offsets");
+            Console.WriteLine($"strings: {strings.Count} - offsets: {stringOffsets.Count}");
+            for (int i = 0; i < strings.Count; i++)
+            {
+                Console.WriteLine($"{strings[i]} - 0x{stringOffsets[i].ToString("X8")}");
+                writer.BaseStream.Seek(0, SeekOrigin.End);
+                uint pos = (uint)writer.BaseStream.Position;
+                writer.Write(strings[i].Length);
+                writer.Write(strings[i].ToCharArray());
+                writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
+                while ((writer.BaseStream.Length).ToString("X").Last() != '0' && (writer.BaseStream.Length).ToString("X").Last() != '4' && (writer.BaseStream.Length).ToString("X").Last() != '8' && (writer.BaseStream.Length).ToString("X").Last() != 'C')
+                {
+                    writer.Write((byte)0);
+                }
+                writer.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
+                writer.Write(pos);
+            }
+
+            Console.WriteLine("Insetings value offsets");
+            Console.WriteLine($"values: {valueOffsets.Count} - offsets: {valuePointers.Count}");
+            for (int i = 0; i < valueOffsets.Count; i++)
+            {
+                Console.WriteLine($"offset to value: 0x{valueOffsets[i].ToString("X8")} - offset to offset: 0x{valuePointers[i].ToString("X8")}");
+                writer.BaseStream.Seek(valuePointers[i], SeekOrigin.Begin);
+                writer.Write(valueOffsets[i]);
+            }
+            writer.BaseStream.Seek(0, SeekOrigin.End);
+            uint rlocPos = (uint)writer.BaseStream.Position;
+            writer.Write(Encoding.UTF8.GetBytes("RLOC".ToCharArray()));
+            writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            writer.BaseStream.Seek(0x8, SeekOrigin.Begin);
+            writer.Write(rlocPos);
+            writer.BaseStream.Seek(0x10, SeekOrigin.Begin);
+            writer.Write(rlocPos);
+
+            writer.Flush();
+            writer.Dispose();
             this.Enabled = true;
             this.Text = "KirbyYAML - " + filePath.Split('\\').Last();
-            this.Cursor = Cursors.WaitCursor;
+            this.Cursor = Cursors.Arrow;
+        }
+
+        public void SaveYAMLNode(BinaryWriter writer, TreeNode node)
+        {
+            writer.BaseStream.Seek(0, SeekOrigin.End);
+            Console.WriteLine($"Reading node {node.Text} : {node.Name} - 0x{writer.BaseStream.Position.ToString("X8")}");
+            valueOffsets.Add((uint)writer.BaseStream.Position);
+            switch (node.Name)
+            {
+                case "Int":
+                    {
+                        writer.Write(1);
+                        writer.Write(int.Parse(node.Tag.ToString()));
+                        break;
+                    }
+                case "Float":
+                    {
+                        writer.Write(2);
+                        writer.Write(float.Parse(node.Tag.ToString()));
+                        break;
+                    }
+                case "Bool":
+                    {
+                        writer.Write(3);
+                        if (node.Tag.ToString() == "True")
+                        {
+                            writer.Write(1);
+                        }
+                        else if (node.Tag.ToString() == "False")
+                        {
+                            writer.Write(0);
+                        }
+                        break;
+                    }
+                case "String":
+                    {
+                        writer.Write(4);
+                        stringOffsets.Add((uint)writer.BaseStream.Position);
+                        writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
+                        break;
+                    }
+                case "Dictionary":
+                    {
+                        writer.Write(5);
+                        writer.Write(node.Nodes.Count);
+                        uint pos = (uint)writer.BaseStream.Position;
+                        for (int i = 0; i < node.Nodes.Count; i++)
+                        {
+                            writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                        }
+                        for (int i = 0; i < node.Nodes.Count; i++)
+                        {
+                            writer.BaseStream.Seek(pos, SeekOrigin.Begin);
+                            strings.Add(node.Nodes[i].Text);
+                            stringOffsets.Add((uint)writer.BaseStream.Position);
+                            writer.BaseStream.Seek(0x4, SeekOrigin.Current);
+                            valuePointers.Add((uint)writer.BaseStream.Position);
+                            writer.BaseStream.Seek(0x4, SeekOrigin.Current);
+                            pos = (uint)writer.BaseStream.Position;
+                            SaveYAMLNode(writer, node.Nodes[i]);
+                        }
+                        break;
+                    }
+                case "List":
+                    {
+                        writer.Write(6);
+                        writer.Write(node.Nodes.Count);
+                        uint pos = (uint)writer.BaseStream.Position;
+                        for (int i = 0; i < node.Nodes.Count; i++)
+                        {
+                            writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
+                        }
+                        for (int i = 0; i < node.Nodes.Count; i++)
+                        {
+                            writer.BaseStream.Seek(pos, SeekOrigin.Begin);
+                            valuePointers.Add((uint)writer.BaseStream.Position);
+                            writer.BaseStream.Seek(0x4, SeekOrigin.Current);
+                            pos = (uint)writer.BaseStream.Position;
+                            SaveYAMLNode(writer, node.Nodes[i]);
+                        }
+                        break;
+                    }
+            }
         }
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
@@ -253,7 +479,7 @@ namespace KirbyYAML
                 type.Enabled = true;
             }
             name.Text = itemList.SelectedNode.Text;
-            value.Text = (string)itemList.SelectedNode.Tag;
+            value.Text = itemList.SelectedNode.Tag.ToString();
             type.Text = itemList.SelectedNode.Name;
         }
 

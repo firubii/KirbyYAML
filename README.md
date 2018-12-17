@@ -1,4 +1,4 @@
 # KirbyYAML
-A WIP Kirby: Star Allies YAML editor
+A YAML editor for Kirby: Star Allies
 
-Currently can only open and view XBIN YAML files, saving coming soon
+Can open, view, edit, and save YAML param files

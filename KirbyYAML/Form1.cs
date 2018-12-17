@@ -348,7 +348,7 @@ namespace KirbyYAML
             writer.Write(Encoding.UTF8.GetBytes("RLOC".ToCharArray()));
             writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
             writer.BaseStream.Seek(0x8, SeekOrigin.Begin);
-            writer.Write(rlocPos - 1);
+            writer.Write(rlocPos);
             writer.BaseStream.Seek(0x10, SeekOrigin.Begin);
             writer.Write(rlocPos);
 

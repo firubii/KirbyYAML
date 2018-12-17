@@ -53,7 +53,7 @@ namespace KirbyYAML
                     uint valtype = reader.ReadUInt32();
                     node.Text = name;
                     node.Name = types[(int)valtype];
-                    Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
+                    //Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                     switch (valtype)
                     {
                         case 1:
@@ -101,7 +101,7 @@ namespace KirbyYAML
                     uint valtype = reader.ReadUInt32();
                     node.Text = "Entry " + i;
                     node.Name = types[(int)valtype];
-                    Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
+                    //Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                     switch (valtype)
                     {
                         case 1:
@@ -183,7 +183,7 @@ namespace KirbyYAML
                         uint valtype = reader.ReadUInt32();
                         node.Text = name;
                         node.Name = types[(int)valtype];
-                        Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
+                        //Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                         switch (valtype)
                         {
                             case 1:
@@ -279,7 +279,7 @@ namespace KirbyYAML
             valuePointers = new List<uint>();
             valueOffsets = new List<uint>();
 
-            Console.WriteLine("Reading nodes");
+            //Console.WriteLine("Reading nodes");
             if (listType == 5)
             {
                 writer.Write(itemList.Nodes.Count);
@@ -318,11 +318,11 @@ namespace KirbyYAML
                 }
             }
 
-            Console.WriteLine("Inserting string offsets");
-            Console.WriteLine($"strings: {strings.Count} - offsets: {stringOffsets.Count}");
+            //Console.WriteLine("Inserting string offsets");
+            //Console.WriteLine($"strings: {strings.Count} - offsets: {stringOffsets.Count}");
             for (int i = 0; i < strings.Count; i++)
             {
-                Console.WriteLine($"{strings[i]} - 0x{stringOffsets[i].ToString("X8")}");
+                //Console.WriteLine($"{strings[i]} - 0x{stringOffsets[i].ToString("X8")}");
                 writer.BaseStream.Seek(0, SeekOrigin.End);
                 uint pos = (uint)writer.BaseStream.Position;
                 writer.Write(strings[i].Length);
@@ -336,11 +336,11 @@ namespace KirbyYAML
                 writer.Write(pos);
             }
 
-            Console.WriteLine("Insetings value offsets");
-            Console.WriteLine($"values: {valueOffsets.Count} - offsets: {valuePointers.Count}");
+            //Console.WriteLine("Insetings value offsets");
+            //Console.WriteLine($"values: {valueOffsets.Count} - offsets: {valuePointers.Count}");
             for (int i = 0; i < valueOffsets.Count; i++)
             {
-                Console.WriteLine($"offset to value: 0x{valueOffsets[i].ToString("X8")} - offset to offset: 0x{valuePointers[i].ToString("X8")}");
+                //Console.WriteLine($"offset to value: 0x{valueOffsets[i].ToString("X8")} - offset to offset: 0x{valuePointers[i].ToString("X8")}");
                 writer.BaseStream.Seek(valuePointers[i], SeekOrigin.Begin);
                 writer.Write(valueOffsets[i]);
             }
@@ -363,7 +363,7 @@ namespace KirbyYAML
         public void SaveYAMLNode(BinaryWriter writer, TreeNode node)
         {
             writer.BaseStream.Seek(0, SeekOrigin.End);
-            Console.WriteLine($"Reading node {node.Text} : {node.Name} - 0x{writer.BaseStream.Position.ToString("X8")}");
+            //Console.WriteLine($"Reading node {node.Text} : {node.Name} - 0x{writer.BaseStream.Position.ToString("X8")}");
             valueOffsets.Add((uint)writer.BaseStream.Position);
             switch (node.Name)
             {

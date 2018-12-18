@@ -47,6 +47,7 @@ namespace KirbyYAML
                 for (int i = 0; i < count; i++)
                 {
                     TreeNode node = new TreeNode();
+                    node.ContextMenuStrip = rClickOptions;
                     reader.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
                     string name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
                     reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
@@ -97,6 +98,7 @@ namespace KirbyYAML
                 for (int i = 0; i < count; i++)
                 {
                     TreeNode node = new TreeNode();
+                    node.ContextMenuStrip = rClickOptions;
                     reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
                     uint valtype = reader.ReadUInt32();
                     node.Text = "Entry " + i;
@@ -176,7 +178,7 @@ namespace KirbyYAML
                     for (int i = 0; i < count; i++)
                     {
                         TreeNode node = new TreeNode();
-
+                        node.ContextMenuStrip = rClickOptions;
                         reader.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
                         string name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
                         reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
@@ -235,6 +237,7 @@ namespace KirbyYAML
                     node.Name = types[6];
                     node.Text = "Root List";
                     node.Tag = "<Collection>";
+                    node.ContextMenuStrip = rClickOptions;
 
                     node.Nodes.AddRange(ReadYAML(reader, 6));
 
@@ -561,6 +564,32 @@ namespace KirbyYAML
             {
                 e.Effect = DragDropEffects.Copy;
             }
+        }
+
+        private void addItemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (itemList.SelectedNode.Name == "Dictionary" || itemList.SelectedNode.Name == "List")
+            {
+                AddItem add = new AddItem();
+                if (add.ShowDialog() == DialogResult.OK)
+                {
+                    TreeNode node = new TreeNode();
+                    node.ContextMenuStrip = rClickOptions;
+                    node.Text = add.itemName;
+                    node.Tag = add.itemValue;
+                    node.Name = add.itemType;
+                    itemList.SelectedNode.Nodes.Add(node);
+                }
+            }
+            else
+            {
+                MessageBox.Show("You can only add an item to a Dictionary or List!", "KirbyYAML", MessageBoxButtons.OK);
+            }
+        }
+
+        private void removeItemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            itemList.SelectedNode.Remove();
         }
     }
 }

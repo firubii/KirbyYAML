@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,7 +44,11 @@
             this.type = new System.Windows.Forms.ComboBox();
             this.expand = new System.Windows.Forms.Button();
             this.collapse = new System.Windows.Forms.Button();
+            this.rClickOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.addItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.removeItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
+            this.rClickOptions.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
@@ -190,6 +195,28 @@
             this.collapse.UseVisualStyleBackColor = true;
             this.collapse.Click += new System.EventHandler(this.collapse_Click);
             // 
+            // rClickOptions
+            // 
+            this.rClickOptions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.addItemToolStripMenuItem,
+            this.removeItemToolStripMenuItem});
+            this.rClickOptions.Name = "rClickOptions";
+            this.rClickOptions.Size = new System.Drawing.Size(181, 70);
+            // 
+            // addItemToolStripMenuItem
+            // 
+            this.addItemToolStripMenuItem.Name = "addItemToolStripMenuItem";
+            this.addItemToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addItemToolStripMenuItem.Text = "Add Item";
+            this.addItemToolStripMenuItem.Click += new System.EventHandler(this.addItemToolStripMenuItem_Click);
+            // 
+            // removeItemToolStripMenuItem
+            // 
+            this.removeItemToolStripMenuItem.Name = "removeItemToolStripMenuItem";
+            this.removeItemToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeItemToolStripMenuItem.Text = "Remove Item";
+            this.removeItemToolStripMenuItem.Click += new System.EventHandler(this.removeItemToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AllowDrop = true;
@@ -217,6 +244,7 @@
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
+            this.rClickOptions.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -239,6 +267,9 @@
         private System.Windows.Forms.ComboBox type;
         private System.Windows.Forms.Button expand;
         private System.Windows.Forms.Button collapse;
+        private System.Windows.Forms.ContextMenuStrip rClickOptions;
+        private System.Windows.Forms.ToolStripMenuItem addItemToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem removeItemToolStripMenuItem;
     }
 }
 

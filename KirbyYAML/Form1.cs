@@ -264,7 +264,12 @@ namespace KirbyYAML
             this.Text = "KirbyYAML - Saving file...";
             this.Cursor = Cursors.WaitCursor;
 
-            BinaryWriter writer = new BinaryWriter(new FileStream(filePath, FileMode.Create));
+            if (File.Exists(filePath))
+            {
+                File.Delete(filePath);
+            }
+
+            BinaryWriter writer = new BinaryWriter(new FileStream(filePath, FileMode.Create, FileAccess.Write));
             writer.Write(new byte[] {
                 0x58, 0x42, 0x49, 0x4E, 0x34, 0x12, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE9, 0xFD, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00 });

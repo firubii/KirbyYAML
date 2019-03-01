@@ -54,6 +54,8 @@ namespace KirbyYAML
                     uint valtype = reader.ReadUInt32();
                     node.Text = name;
                     node.Name = types[(int)valtype];
+                    node.ImageIndex = (int)valtype - 1;
+                    node.SelectedImageIndex = (int)valtype - 1;
                     //Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                     switch (valtype)
                     {
@@ -103,6 +105,8 @@ namespace KirbyYAML
                     uint valtype = reader.ReadUInt32();
                     node.Text = "Entry " + i;
                     node.Name = types[(int)valtype];
+                    node.ImageIndex = (int)valtype - 1;
+                    node.SelectedImageIndex = (int)valtype - 1;
                     //Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                     switch (valtype)
                     {
@@ -185,6 +189,8 @@ namespace KirbyYAML
                         uint valtype = reader.ReadUInt32();
                         node.Text = name;
                         node.Name = types[(int)valtype];
+                        node.ImageIndex = (int)valtype - 1;
+                        node.SelectedImageIndex = (int)valtype - 1;
                         //Console.WriteLine($"Reading entry {node.Text} : {node.Name} - 0x{(reader.BaseStream.Position - 4).ToString("X8")}");
                         switch (valtype)
                         {
@@ -238,6 +244,8 @@ namespace KirbyYAML
                     node.Text = "Root List";
                     node.Tag = "<Collection>";
                     node.ContextMenuStrip = rClickOptions;
+                    node.ImageIndex = 5;
+                    node.SelectedImageIndex = 5;
 
                     node.Nodes.AddRange(ReadYAML(reader, 6));
 
@@ -545,6 +553,8 @@ namespace KirbyYAML
             if (itemList.SelectedNode != null && type.Text != "Dictionary" && type.Text != "List")
             {
                 itemList.SelectedNode.Name = type.Text;
+                itemList.SelectedNode.ImageIndex = type.SelectedIndex;
+                itemList.SelectedNode.SelectedImageIndex = type.SelectedIndex;
             }
         }
 
@@ -583,6 +593,8 @@ namespace KirbyYAML
                     node.Text = add.itemName;
                     node.Tag = add.itemValue;
                     node.Name = add.itemType;
+                    node.ImageIndex = int.Parse(add.itemType) - 1;
+                    node.SelectedImageIndex = int.Parse(add.itemType) - 1;
                     itemList.SelectedNode.Nodes.Add(node);
                 }
             }

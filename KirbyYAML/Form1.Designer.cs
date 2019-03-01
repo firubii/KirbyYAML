@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,6 +48,7 @@
             this.rClickOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.menuStrip1.SuspendLayout();
             this.rClickOptions.SuspendLayout();
             this.SuspendLayout();
@@ -109,8 +111,11 @@
             // 
             // itemList
             // 
+            this.itemList.ImageIndex = 0;
+            this.itemList.ImageList = this.imageList1;
             this.itemList.Location = new System.Drawing.Point(12, 44);
             this.itemList.Name = "itemList";
+            this.itemList.SelectedImageIndex = 0;
             this.itemList.Size = new System.Drawing.Size(238, 392);
             this.itemList.TabIndex = 3;
             this.itemList.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.itemList_AfterSelect);
@@ -201,21 +206,32 @@
             this.addItemToolStripMenuItem,
             this.removeItemToolStripMenuItem});
             this.rClickOptions.Name = "rClickOptions";
-            this.rClickOptions.Size = new System.Drawing.Size(181, 70);
+            this.rClickOptions.Size = new System.Drawing.Size(145, 48);
             // 
             // addItemToolStripMenuItem
             // 
             this.addItemToolStripMenuItem.Name = "addItemToolStripMenuItem";
-            this.addItemToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addItemToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.addItemToolStripMenuItem.Text = "Add Item";
             this.addItemToolStripMenuItem.Click += new System.EventHandler(this.addItemToolStripMenuItem_Click);
             // 
             // removeItemToolStripMenuItem
             // 
             this.removeItemToolStripMenuItem.Name = "removeItemToolStripMenuItem";
-            this.removeItemToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.removeItemToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
             this.removeItemToolStripMenuItem.Text = "Remove Item";
             this.removeItemToolStripMenuItem.Click += new System.EventHandler(this.removeItemToolStripMenuItem_Click);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "int.png");
+            this.imageList1.Images.SetKeyName(1, "float.png");
+            this.imageList1.Images.SetKeyName(2, "bool.png");
+            this.imageList1.Images.SetKeyName(3, "string.png");
+            this.imageList1.Images.SetKeyName(4, "dict.png");
+            this.imageList1.Images.SetKeyName(5, "list.png");
             // 
             // Form1
             // 
@@ -270,6 +286,7 @@
         private System.Windows.Forms.ContextMenuStrip rClickOptions;
         private System.Windows.Forms.ToolStripMenuItem addItemToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeItemToolStripMenuItem;
+        private System.Windows.Forms.ImageList imageList1;
     }
 }
 

@@ -20,6 +20,7 @@ namespace KirbyYAML
         }
 
         string filePath = "";
+        ushort yamlVersion;
 
         public Dictionary<int, string> types = new Dictionary<int, string>()
         {
@@ -155,7 +156,21 @@ namespace KirbyYAML
             BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open));
             if (Encoding.UTF8.GetString(reader.ReadBytes(4)) == "XBIN")
             {
-                reader.BaseStream.Seek(0x1C, SeekOrigin.Begin);
+                reader.BaseStream.Seek(0x6, SeekOrigin.Begin);
+                yamlVersion = reader.ReadUInt16();
+                if (yamlVersion == 2)
+                {
+                    reader.BaseStream.Seek(0x18, SeekOrigin.Begin);
+                }
+                else if (yamlVersion == 4)
+                {
+                    reader.BaseStream.Seek(0x1C, SeekOrigin.Begin);
+                }
+                else
+                {
+                    MessageBox.Show($"Unknown YAML Version {yamlVersion}", "KirbyYAML");
+                    return;
+                }
                 uint listType = reader.ReadUInt32();
                 if (listType == 5)
                 {
@@ -273,9 +288,18 @@ namespace KirbyYAML
             this.Cursor = Cursors.WaitCursor;
 
             BinaryWriter writer = new BinaryWriter(new FileStream(filePath, FileMode.Create));
-            writer.Write(new byte[] {
+            if (yamlVersion == 4)
+            {
+                writer.Write(new byte[] {
                 0x58, 0x42, 0x49, 0x4E, 0x34, 0x12, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE9, 0xFD, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00 });
+            }
+            else if (yamlVersion == 2)
+            {
+                writer.Write(new byte[] {
+                0x58, 0x42, 0x49, 0x4E, 0x34, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE9, 0xFD, 0x00, 0x00,
+                0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00 });
+            }
 
             int listType = 5;
             if (itemList.Nodes[0].Text == "Root List")
@@ -357,11 +381,14 @@ namespace KirbyYAML
             }
             writer.BaseStream.Seek(0, SeekOrigin.End);
             uint rlocPos = (uint)writer.BaseStream.Position;
-            writer.Write(Encoding.UTF8.GetBytes("RLOC".ToCharArray()));
-            writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            if (yamlVersion == 4)
+            {
+                writer.Write(Encoding.UTF8.GetBytes("RLOC".ToCharArray()));
+                writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                writer.BaseStream.Seek(0x10, SeekOrigin.Begin);
+                writer.Write(rlocPos);
+            }
             writer.BaseStream.Seek(0x8, SeekOrigin.Begin);
-            writer.Write(rlocPos);
-            writer.BaseStream.Seek(0x10, SeekOrigin.Begin);
             writer.Write(rlocPos);
 
             writer.Flush();

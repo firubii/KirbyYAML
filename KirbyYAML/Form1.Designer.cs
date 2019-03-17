@@ -37,6 +37,7 @@
             this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.itemList = new System.Windows.Forms.TreeView();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
             this.label2 = new System.Windows.Forms.Label();
             this.name = new System.Windows.Forms.TextBox();
             this.value = new System.Windows.Forms.TextBox();
@@ -48,7 +49,8 @@
             this.rClickOptions = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeItemToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.dataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.dumpToYAMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.rClickOptions.SuspendLayout();
             this.SuspendLayout();
@@ -56,7 +58,8 @@
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
+            this.fileToolStripMenuItem,
+            this.dataToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(475, 24);
@@ -119,6 +122,17 @@
             this.itemList.Size = new System.Drawing.Size(238, 392);
             this.itemList.TabIndex = 3;
             this.itemList.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.itemList_AfterSelect);
+            // 
+            // imageList1
+            // 
+            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
+            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
+            this.imageList1.Images.SetKeyName(0, "int.png");
+            this.imageList1.Images.SetKeyName(1, "float.png");
+            this.imageList1.Images.SetKeyName(2, "bool.png");
+            this.imageList1.Images.SetKeyName(3, "string.png");
+            this.imageList1.Images.SetKeyName(4, "dict.png");
+            this.imageList1.Images.SetKeyName(5, "list.png");
             // 
             // label2
             // 
@@ -222,16 +236,20 @@
             this.removeItemToolStripMenuItem.Text = "Remove Item";
             this.removeItemToolStripMenuItem.Click += new System.EventHandler(this.removeItemToolStripMenuItem_Click);
             // 
-            // imageList1
+            // dataToolStripMenuItem
             // 
-            this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
-            this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
-            this.imageList1.Images.SetKeyName(0, "int.png");
-            this.imageList1.Images.SetKeyName(1, "float.png");
-            this.imageList1.Images.SetKeyName(2, "bool.png");
-            this.imageList1.Images.SetKeyName(3, "string.png");
-            this.imageList1.Images.SetKeyName(4, "dict.png");
-            this.imageList1.Images.SetKeyName(5, "list.png");
+            this.dataToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.dumpToYAMLToolStripMenuItem});
+            this.dataToolStripMenuItem.Name = "dataToolStripMenuItem";
+            this.dataToolStripMenuItem.Size = new System.Drawing.Size(43, 20);
+            this.dataToolStripMenuItem.Text = "Data";
+            // 
+            // dumpToYAMLToolStripMenuItem
+            // 
+            this.dumpToYAMLToolStripMenuItem.Name = "dumpToYAMLToolStripMenuItem";
+            this.dumpToYAMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.dumpToYAMLToolStripMenuItem.Text = "Dump to YAML";
+            this.dumpToYAMLToolStripMenuItem.Click += new System.EventHandler(this.dumpToYAMLToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -287,6 +305,8 @@
         private System.Windows.Forms.ToolStripMenuItem addItemToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem removeItemToolStripMenuItem;
         private System.Windows.Forms.ImageList imageList1;
+        private System.Windows.Forms.ToolStripMenuItem dataToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem dumpToYAMLToolStripMenuItem;
     }
 }
 

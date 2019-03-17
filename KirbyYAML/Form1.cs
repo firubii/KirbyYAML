@@ -631,5 +631,112 @@ namespace KirbyYAML
         {
             itemList.SelectedNode.Remove();
         }
+
+        private void dumpToYAMLToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "YAML Text Files|*.yaml";
+            save.AddExtension = true;
+            save.DefaultExt = ".yaml";
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                List<string> yaml = new List<string>();
+                for (int i = 0; i < itemList.Nodes.Count; i++)
+                {
+                    yaml.AddRange(DumpYAML(itemList.Nodes[i], 0));
+                }
+                File.WriteAllLines(save.FileName, yaml);
+            }
+        }
+
+        string[] DumpYAML(TreeNode node, uint level)
+        {
+            List<string> yaml = new List<string>();
+            string indent = "";
+            for (int i = 0; i < level; i++)
+            {
+                indent += "  ";
+            }
+            switch (node.Name)
+            {
+                case "Int":
+                case "Float":
+                case "String":
+                    {
+                        if (node.Parent != null)
+                        {
+                            if (node.Parent.Name == "List")
+                            {
+                                yaml.Add($"{indent}- {node.Tag}");
+                                break;
+                            }
+                        }
+                        yaml.Add($"{indent}{node.Text}: {node.Tag}");
+                        break;
+                    }
+                case "Bool":
+                    {
+                        if (node.Parent != null)
+                        {
+                            if (node.Parent.Name == "List")
+                            {
+                                yaml.Add($"{indent}- {node.Tag.ToString().ToLower()}");
+                                break;
+                            }
+                        }
+                        yaml.Add($"{indent}{node.Text}: {node.Tag.ToString().ToLower()}");
+                        break;
+                    }
+                case "Dictionary":
+                    {
+                        if (node.Parent != null)
+                        {
+                            if (node.Parent.Name == "List")
+                            {
+                                for (int i = 0; i < node.Nodes.Count; i++)
+                                {
+                                    string[] next = DumpYAML(node.Nodes[i], level + 1);
+                                    if (i == 0)
+                                    {
+                                        next[0] = $"{indent.Remove((int)level * 2 - 2, 2)}- {next[0].TrimStart(' ')}";
+                                    }
+                                    yaml.AddRange(next);
+                                }
+                                break;
+                            }
+                        }
+                        yaml.Add($"{indent}{node.Text}:");
+                        for (int i = 0; i < node.Nodes.Count; i++)
+                        {
+                            string[] next = DumpYAML(node.Nodes[i], level + 1);
+                            yaml.AddRange(next);
+                        }
+                        break;
+                    }
+                case "List":
+                    {
+                        if (node.Parent != null)
+                        {
+                            if (node.Parent.Name == "List")
+                            {
+                                for (int i = 0; i < node.Nodes.Count; i++)
+                                {
+                                    string[] next = DumpYAML(node.Nodes[i], level + 1);
+                                    yaml.AddRange(next);
+                                }
+                                break;
+                            }
+                        }
+                        yaml.Add($"{indent}{node.Text}:");
+                        for (int i = 0; i < node.Nodes.Count; i++)
+                        {
+                            string[] next = DumpYAML(node.Nodes[i], level + 1);
+                            yaml.AddRange(next);
+                        }
+                        break;
+                    }
+            }
+            return yaml.ToArray();
+        }
     }
 }

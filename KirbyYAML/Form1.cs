@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Threading;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace KirbyYAML
 {
@@ -737,6 +739,147 @@ namespace KirbyYAML
                     }
             }
             return yaml.ToArray();
+        }
+
+        private void exportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "eXtensible Markup Language Files|*.xml";
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                ToXML(save.FileName);
+            }
+        }
+
+        private void importToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "eXtensible Markup Language Files|*.xml";
+            open.CheckFileExists = true;
+            if (open.ShowDialog() == DialogResult.OK)
+            {
+                FromXML(open.FileName);
+            }
+        }
+
+        XmlDocument xmlDoc;
+        void ToXML(string filePath)
+        {
+            xmlDoc = new XmlDocument();
+
+            XmlNode rootNode = xmlDoc.CreateElement("yaml");
+            for (int i = 0; i < itemList.Nodes.Count; i++)
+            {
+                rootNode.AppendChild(YamlToXml(itemList.Nodes[i]));
+            }
+            xmlDoc.AppendChild(rootNode);
+            
+            xmlDoc.Save(filePath);
+        }
+        XmlNode YamlToXml(TreeNode node)
+        {
+            XmlNode xmlNode = xmlDoc.CreateElement(node.Name.ToLower());
+            if (!node.Text.StartsWith("Entry "))
+            {
+                XmlAttribute attribute = xmlDoc.CreateAttribute("name");
+                attribute.Value = node.Text;
+                xmlNode.Attributes.Append(attribute);
+            }
+            if (node.Name != "Dictionary" && node.Name != "List")
+            {
+                xmlNode.InnerText = node.Tag.ToString();
+            }
+            for (int i = 0; i < node.Nodes.Count; i++)
+            {
+                xmlNode.AppendChild(YamlToXml(node.Nodes[i]));
+            }
+            return xmlNode;
+        }
+
+        void FromXML(string filePath)
+        {
+            itemList.Nodes.Clear();
+            itemList.BeginUpdate();
+            XmlDocument import = new XmlDocument();
+            import.Load(filePath);
+            if (import.ChildNodes[0].Name == "yaml")
+            {
+                for (int i = 0; i < import.ChildNodes[0].ChildNodes.Count; i++)
+                {
+                    itemList.Nodes.Add(XmlToYaml(import.ChildNodes[0].ChildNodes[i]));
+                }
+            }
+            itemList.EndUpdate();
+        }
+        TreeNode XmlToYaml(XmlNode node)
+        {
+            TreeNode treeNode = new TreeNode();
+            if (node.Attributes.Count > 0)
+            {
+                treeNode.Text = node.Attributes["name"].Value;
+            }
+            switch (node.Name)
+            {
+                case "int":
+                    {
+                        treeNode.ImageIndex = 0;
+                        treeNode.SelectedImageIndex = 0;
+                        treeNode.Name = "Int";
+                        treeNode.Tag = uint.Parse(node.InnerText);
+                        break;
+                    }
+                case "float":
+                    {
+                        treeNode.ImageIndex = 1;
+                        treeNode.SelectedImageIndex = 1;
+                        treeNode.Name = "Float";
+                        treeNode.Tag = float.Parse(node.InnerText);
+                        break;
+                    }
+                case "bool":
+                    {
+                        treeNode.ImageIndex = 2;
+                        treeNode.SelectedImageIndex = 2;
+                        treeNode.Name = "Bool";
+                        treeNode.Tag = Convert.ToBoolean(node.InnerText);
+                        break;
+                    }
+                case "string":
+                    {
+                        treeNode.ImageIndex = 3;
+                        treeNode.SelectedImageIndex = 3;
+                        treeNode.Name = "String";
+                        treeNode.Tag = node.InnerText;
+                        break;
+                    }
+                case "dictionary":
+                    {
+                        treeNode.ImageIndex = 4;
+                        treeNode.SelectedImageIndex = 4;
+                        treeNode.Name = "Dictionary";
+                        treeNode.Tag = "<Collection>";
+                        for (int i = 0; i < node.ChildNodes.Count; i++)
+                        {
+                            treeNode.Nodes.Add(XmlToYaml(node.ChildNodes[i]));
+                        }
+                        break;
+                    }
+                case "list":
+                    {
+                        treeNode.ImageIndex = 5;
+                        treeNode.SelectedImageIndex = 5;
+                        treeNode.Name = "List";
+                        treeNode.Tag = "<Collection>";
+                        for (int i = 0; i < node.ChildNodes.Count; i++)
+                        {
+                            TreeNode child = XmlToYaml(node.ChildNodes[i]);
+                            child.Text = "Entry " + i;
+                            treeNode.Nodes.Add(child);
+                        }
+                        break;
+                    }
+            }
+            return treeNode;
         }
     }
 }

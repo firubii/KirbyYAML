@@ -411,7 +411,7 @@ namespace KirbyYAML
                 case "Int":
                     {
                         writer.Write(1);
-                        writer.Write(int.Parse(node.Tag.ToString()));
+                        writer.Write(uint.Parse(node.Tag.ToString()));
                         break;
                     }
                 case "Float":

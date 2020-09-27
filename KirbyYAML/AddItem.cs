@@ -12,21 +12,21 @@ namespace KirbyYAML
 {
     public partial class AddItem : Form
     {
-
         public string itemName;
         public string itemValue;
-        public string itemType;
+        public int itemType;
 
         public AddItem()
         {
             InitializeComponent();
+            type.SelectedIndex = 0;
         }
 
         private void save_Click(object sender, EventArgs e)
         {
             itemName = name.Text;
             itemValue = value.Text;
-            itemType = type.Text;
+            itemType = type.SelectedIndex + 1;
             DialogResult = DialogResult.OK;
         }
     }

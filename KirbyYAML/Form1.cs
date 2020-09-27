@@ -617,9 +617,9 @@ namespace KirbyYAML
                     node.ContextMenuStrip = rClickOptions;
                     node.Text = add.itemName;
                     node.Tag = add.itemValue;
-                    node.Name = add.itemType;
-                    node.ImageIndex = int.Parse(add.itemType) - 1;
-                    node.SelectedImageIndex = int.Parse(add.itemType) - 1;
+                    node.Name = types[add.itemType];
+                    node.ImageIndex = add.itemType - 1;
+                    node.SelectedImageIndex = add.itemType - 1;
                     itemList.SelectedNode.Nodes.Add(node);
                 }
             }

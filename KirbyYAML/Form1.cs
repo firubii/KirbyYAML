@@ -11,6 +11,8 @@ using System.IO;
 using System.Threading;
 using System.Xml;
 using System.Xml.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace KirbyYAML
 {
@@ -22,7 +24,8 @@ namespace KirbyYAML
         }
 
         string filePath = "";
-        ushort yamlVersion;
+        uint yamlVersion;
+        ushort xbinVersion;
 
         public Dictionary<int, string> types = new Dictionary<int, string>()
         {
@@ -44,8 +47,8 @@ namespace KirbyYAML
             {
                 for (int i = 0; i < count; i++)
                 {
-                    stringOffsets.Add(reader.ReadUInt32());
-                    valueOffsets.Add(reader.ReadUInt32());
+                    stringOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
+                    valueOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                 }
                 for (int i = 0; i < count; i++)
                 {
@@ -79,7 +82,7 @@ namespace KirbyYAML
                             }
                         case 4:
                             {
-                                reader.BaseStream.Seek(reader.ReadUInt32(), SeekOrigin.Begin);
+                                reader.BaseStream.Seek((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32(), SeekOrigin.Begin);
                                 node.Tag = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
                                 break;
                             }
@@ -98,7 +101,7 @@ namespace KirbyYAML
             {
                 for (int i = 0; i < count; i++)
                 {
-                    valueOffsets.Add(reader.ReadUInt32());
+                    valueOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                 }
                 for (int i = 0; i < count; i++)
                 {
@@ -130,7 +133,7 @@ namespace KirbyYAML
                             }
                         case 4:
                             {
-                                reader.BaseStream.Seek(reader.ReadUInt32(), SeekOrigin.Begin);
+                                reader.BaseStream.Seek((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32(), SeekOrigin.Begin);
                                 node.Tag = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
                                 break;
                             }
@@ -158,21 +161,22 @@ namespace KirbyYAML
             BinaryReader reader = new BinaryReader(new FileStream(filePath, FileMode.Open));
             if (Encoding.UTF8.GetString(reader.ReadBytes(4)) == "XBIN")
             {
-                reader.BaseStream.Seek(0x6, SeekOrigin.Begin);
-                yamlVersion = reader.ReadUInt16();
-                if (yamlVersion == 2)
-                {
-                    reader.BaseStream.Seek(0x18, SeekOrigin.Begin);
-                }
-                else if (yamlVersion == 4)
-                {
-                    reader.BaseStream.Seek(0x1C, SeekOrigin.Begin);
-                }
-                else
+                reader.BaseStream.Seek(2, SeekOrigin.Current);
+                xbinVersion = reader.ReadUInt16();
+
+                reader.BaseStream.Seek(xbinVersion > 2 ? 0x18 : 0x14, SeekOrigin.Begin);
+                yamlVersion = reader.ReadUInt32();
+                if (yamlVersion > 5)
                 {
                     MessageBox.Show($"Unknown YAML Version {yamlVersion}", "KirbyYAML");
                     return;
                 }
+
+                if (xbinVersion < 4)
+                    reader.BaseStream.Seek(0x18, SeekOrigin.Begin);
+                else
+                    reader.BaseStream.Seek(0x1C, SeekOrigin.Begin);
+
                 uint listType = reader.ReadUInt32();
                 if (listType == 5)
                 {
@@ -193,8 +197,8 @@ namespace KirbyYAML
                     uint count = reader.ReadUInt32();
                     for (int i = 0; i < count; i++)
                     {
-                        stringOffsets.Add(reader.ReadUInt32());
-                        valueOffsets.Add(reader.ReadUInt32());
+                        stringOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
+                        valueOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                     }
                     for (int i = 0; i < count; i++)
                     {
@@ -228,7 +232,7 @@ namespace KirbyYAML
                                 }
                             case 4:
                                 {
-                                    reader.BaseStream.Seek(reader.ReadUInt32(), SeekOrigin.Begin);
+                                    reader.BaseStream.Seek((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32(), SeekOrigin.Begin);
                                     node.Tag = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
                                     break;
                                 }
@@ -290,24 +294,18 @@ namespace KirbyYAML
             this.Cursor = Cursors.WaitCursor;
 
             BinaryWriter writer = new BinaryWriter(new FileStream(filePath, FileMode.Create));
-            if (yamlVersion == 4)
-            {
-                writer.Write(new byte[] {
-                0x58, 0x42, 0x49, 0x4E, 0x34, 0x12, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE9, 0xFD, 0x00, 0x00,
-                0x00, 0x00, 0x00, 0x00, 0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00 });
-            }
-            else if (yamlVersion == 2)
-            {
-                writer.Write(new byte[] {
-                0x58, 0x42, 0x49, 0x4E, 0x34, 0x12, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0xE9, 0xFD, 0x00, 0x00,
-                0x59, 0x41, 0x4D, 0x4C, 0x02, 0x00, 0x00, 0x00 });
-            }
+            writer.Write(new byte[] { 0x58, 0x42, 0x49, 0x4E, 0x34, 0x12 });
+            writer.Write(xbinVersion);
+            writer.Write(0);
+            writer.Write(65001);
+            if (xbinVersion > 2)
+                writer.Write(0);
+            writer.Write(new byte[] { 0x59, 0x41, 0x4D, 0x4C }); //YAML
+            writer.Write(yamlVersion);
 
             int listType = 5;
             if (itemList.Nodes[0].Text == "Root List")
-            {
                 listType = 6;
-            }
 
             writer.Write(listType);
 
@@ -365,12 +363,14 @@ namespace KirbyYAML
                 writer.Write(strings[i].Length);
                 writer.Write(strings[i].ToCharArray());
                 writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
-                while ((writer.BaseStream.Length).ToString("X").Last() != '0' && (writer.BaseStream.Length).ToString("X").Last() != '4' && (writer.BaseStream.Length).ToString("X").Last() != '8' && (writer.BaseStream.Length).ToString("X").Last() != 'C')
-                {
+                while ((writer.BaseStream.Position % 0x4) != 0x0)
                     writer.Write((byte)0);
-                }
+
                 writer.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
-                writer.Write(pos);
+                if (yamlVersion < 5)
+                    writer.Write(pos);
+                else
+                    writer.Write(pos - stringOffsets[i]);
             }
 
             //Console.WriteLine("Insetings value offsets");
@@ -379,11 +379,14 @@ namespace KirbyYAML
             {
                 //Console.WriteLine($"offset to value: 0x{valueOffsets[i].ToString("X8")} - offset to offset: 0x{valuePointers[i].ToString("X8")}");
                 writer.BaseStream.Seek(valuePointers[i], SeekOrigin.Begin);
-                writer.Write(valueOffsets[i]);
+                if (yamlVersion < 5)
+                    writer.Write(valueOffsets[i]);
+                else
+                    writer.Write(valueOffsets[i] - valuePointers[i]);
             }
             writer.BaseStream.Seek(0, SeekOrigin.End);
             uint rlocPos = (uint)writer.BaseStream.Position;
-            if (yamlVersion == 4)
+            if (xbinVersion > 2)
             {
                 writer.Write(Encoding.UTF8.GetBytes("RLOC".ToCharArray()));
                 writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
@@ -640,6 +643,7 @@ namespace KirbyYAML
             save.Filter = "YAML Text Files|*.yaml";
             save.AddExtension = true;
             save.DefaultExt = ".yaml";
+            save.FileName = Path.GetFileNameWithoutExtension(filePath) + ".yaml";
             if (save.ShowDialog() == DialogResult.OK)
             {
                 List<string> yaml = new List<string>();
@@ -745,6 +749,7 @@ namespace KirbyYAML
         {
             SaveFileDialog save = new SaveFileDialog();
             save.Filter = "eXtensible Markup Language Files|*.xml";
+            save.FileName = Path.GetFileNameWithoutExtension(filePath) + ".xml";
             if (save.ShowDialog() == DialogResult.OK)
             {
                 ToXML(save.FileName);
@@ -756,6 +761,7 @@ namespace KirbyYAML
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "eXtensible Markup Language Files|*.xml";
             open.CheckFileExists = true;
+            open.FileName = Path.GetFileNameWithoutExtension(filePath) + ".xml";
             if (open.ShowDialog() == DialogResult.OK)
             {
                 FromXML(open.FileName);
@@ -880,6 +886,75 @@ namespace KirbyYAML
                     }
             }
             return treeNode;
+        }
+
+        void ToJSON(string filePath)
+        {
+            JObject obj = new JObject();
+
+            for (int i = 0; i < itemList.Nodes.Count; i++)
+            {
+                obj.Add(YamlToJSON(itemList.Nodes[i]));
+            }
+
+            using (StreamWriter stream = new StreamWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write)))
+            {
+                using (JsonTextWriter writer = new JsonTextWriter(stream))
+                {
+                    obj.WriteTo(writer);
+                }
+            }
+        }
+        JToken YamlToJSON(TreeNode node)
+        {
+            if (node.Name == "List")
+            {
+                List<JToken> tokens = new List<JToken>();
+                for (int i = 0; i < node.Nodes.Count; i++)
+                {
+                    tokens.Add(YamlToJSON(node.Nodes[i]));
+                }
+                return new JProperty(node.Text, tokens.ToArray());
+            }
+            else if (node.Name == "Dictionary")
+            {
+                List<JToken> tokens = new List<JToken>();
+                for (int i = 0; i < node.Nodes.Count; i++)
+                {
+                    tokens.Add(YamlToJSON(node.Nodes[i]));
+                }
+                return new JProperty(node.Text, tokens.ToArray());
+            }
+            else
+            {
+                object value;
+                switch (node.Name)
+                {
+                    default:
+                    case "Int":
+                        value = int.Parse(node.Tag.ToString());
+                        break;
+                    case "Float":
+                        value = float.Parse(node.Tag.ToString());
+                        break;
+                    case "Bool":
+                        value = bool.Parse(node.Tag.ToString());
+                        break;
+                }
+                return new JProperty(node.Text, value);
+            }
+        }
+
+        private void exportToolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog save = new SaveFileDialog();
+            save.Filter = "JSON Files|*.json";
+            save.FileName = Path.GetFileNameWithoutExtension(filePath) + ".json";
+            save.AddExtension = true;
+            if (save.ShowDialog() == DialogResult.OK)
+            {
+                ToJSON(save.FileName);
+            }
         }
     }
 }

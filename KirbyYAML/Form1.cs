@@ -67,7 +67,7 @@ namespace KirbyYAML
                     {
                         case 1:
                             {
-                                node.Tag = reader.ReadUInt32();
+                                node.Tag = reader.ReadInt32();
                                 break;
                             }
                         case 2:
@@ -118,7 +118,7 @@ namespace KirbyYAML
                     {
                         case 1:
                             {
-                                node.Tag = reader.ReadUInt32();
+                                node.Tag = reader.ReadInt32();
                                 break;
                             }
                         case 2:
@@ -217,7 +217,7 @@ namespace KirbyYAML
                         {
                             case 1:
                                 {
-                                    node.Tag = reader.ReadUInt32();
+                                    node.Tag = reader.ReadInt32();
                                     break;
                                 }
                             case 2:
@@ -414,7 +414,7 @@ namespace KirbyYAML
                 case "Int":
                     {
                         writer.Write(1);
-                        writer.Write(uint.Parse(node.Tag.ToString()));
+                        writer.Write(int.Parse(node.Tag.ToString()));
                         break;
                     }
                 case "Float":
@@ -427,13 +427,9 @@ namespace KirbyYAML
                     {
                         writer.Write(3);
                         if (node.Tag.ToString() == "True")
-                        {
                             writer.Write(1);
-                        }
-                        else if (node.Tag.ToString() == "False")
-                        {
+                        else
                             writer.Write(0);
-                        }
                         break;
                     }
                 case "String":

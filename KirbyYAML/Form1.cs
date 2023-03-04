@@ -50,13 +50,20 @@ namespace KirbyYAML
                     stringOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                     valueOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                 }
+
+                int[] readOrder = new int[count];
+                for (int i = 0; i < count; i++)
+                    readOrder[i] = yamlVersion >= 5 ? reader.ReadInt32() : i;
+
                 for (int i = 0; i < count; i++)
                 {
+                    int index = readOrder[i];
+
                     TreeNode node = new TreeNode();
                     node.ContextMenuStrip = rClickOptions;
-                    reader.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
+                    reader.BaseStream.Seek(stringOffsets[index], SeekOrigin.Begin);
                     string name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
-                    reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
+                    reader.BaseStream.Seek(valueOffsets[index], SeekOrigin.Begin);
                     uint valtype = reader.ReadUInt32();
                     node.Text = name;
                     node.Name = types[(int)valtype];
@@ -200,13 +207,20 @@ namespace KirbyYAML
                         stringOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                         valueOffsets.Add((yamlVersion == 5 ? (uint)reader.BaseStream.Position : 0) + reader.ReadUInt32());
                     }
+
+                    int[] readOrder = new int[count];
+                    for (int i = 0; i < count; i++)
+                        readOrder[i] = yamlVersion >= 5 ? reader.ReadInt32() : i;
+
                     for (int i = 0; i < count; i++)
                     {
+                        int index = readOrder[i];
+
                         TreeNode node = new TreeNode();
                         node.ContextMenuStrip = rClickOptions;
-                        reader.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
+                        reader.BaseStream.Seek(stringOffsets[index], SeekOrigin.Begin);
                         string name = Encoding.UTF8.GetString(reader.ReadBytes(reader.ReadInt32()));
-                        reader.BaseStream.Seek(valueOffsets[i], SeekOrigin.Begin);
+                        reader.BaseStream.Seek(valueOffsets[index], SeekOrigin.Begin);
                         uint valtype = reader.ReadUInt32();
                         node.Text = name;
                         node.Name = types[(int)valtype];
@@ -251,7 +265,7 @@ namespace KirbyYAML
                     this.Cursor = Cursors.Default;
                     this.Text = "KirbyYAML - " + filePath.Split('\\').Last();
                 }
-                if (listType == 6)
+                else if (listType == 6)
                 {
                     this.Enabled = false;
                     this.Cursor = Cursors.WaitCursor;
@@ -317,22 +331,37 @@ namespace KirbyYAML
             //Console.WriteLine("Reading nodes");
             if (listType == 5)
             {
+                TreeNode[] sortedNodes = new TreeNode[itemList.Nodes.Count];
+                itemList.Nodes.CopyTo(sortedNodes, 0);
+                sortedNodes = sortedNodes.OrderBy(x => x.Text).ToArray();
+
                 writer.Write(itemList.Nodes.Count);
                 uint pos = (uint)writer.BaseStream.Position;
-                for (int i = 0; i < itemList.Nodes.Count; i++)
+                for (int i = 0; i < sortedNodes.Length; i++)
                 {
-                    writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                    writer.Write(0);
+                    writer.Write(0);
                 }
-                for (int i = 0; i < itemList.Nodes.Count; i++)
+
+                if (yamlVersion >= 5)
                 {
-                    writer.BaseStream.Seek(pos, SeekOrigin.Begin);
-                    strings.Add(itemList.Nodes[i].Text);
+                    for (int i = 0; i < itemList.Nodes.Count; i++)
+                        writer.Write(sortedNodes.ToList().IndexOf(itemList.Nodes[i]));
+                }
+
+                for (int i = 0; i < sortedNodes.Length; i++)
+                {
+                    writer.BaseStream.Seek(pos + (i * 8), SeekOrigin.Begin);
+
+                    strings.Add(sortedNodes[i].Text);
                     stringOffsets.Add((uint)writer.BaseStream.Position);
+
                     writer.BaseStream.Seek(0x4, SeekOrigin.Current);
                     valuePointers.Add((uint)writer.BaseStream.Position);
+
                     writer.BaseStream.Seek(0x4, SeekOrigin.Current);
-                    pos = (uint)writer.BaseStream.Position;
-                    SaveYAMLNode(writer, itemList.Nodes[i]);
+
+                    SaveYAMLNode(writer, sortedNodes[i]);
                 }
             }
             else if (listType == 6)
@@ -355,22 +384,30 @@ namespace KirbyYAML
 
             //Console.WriteLine("Inserting string offsets");
             //Console.WriteLine($"strings: {strings.Count} - offsets: {stringOffsets.Count}");
+            Dictionary<string, uint> writtenStrings = new Dictionary<string, uint>();
             for (int i = 0; i < strings.Count; i++)
             {
                 //Console.WriteLine($"{strings[i]} - 0x{stringOffsets[i].ToString("X8")}");
-                writer.BaseStream.Seek(0, SeekOrigin.End);
-                uint pos = (uint)writer.BaseStream.Position;
-                writer.Write(strings[i].Length);
-                writer.Write(strings[i].ToCharArray());
-                writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00 });
-                while ((writer.BaseStream.Position % 0x4) != 0x0)
+                string str = strings[i];
+
+                if (!writtenStrings.ContainsKey(str))
+                {
+                    writer.BaseStream.Seek(0, SeekOrigin.End);
+                    uint pos = (uint)writer.BaseStream.Position;
+                    writer.Write(str.Length);
+                    writer.Write(Encoding.UTF8.GetBytes(str));
                     writer.Write((byte)0);
+                    while ((writer.BaseStream.Position % 0x4) != 0x0)
+                        writer.Write((byte)0);
+
+                    writtenStrings.Add(str, pos);
+                }
 
                 writer.BaseStream.Seek(stringOffsets[i], SeekOrigin.Begin);
                 if (yamlVersion < 5)
-                    writer.Write(pos);
+                    writer.Write(writtenStrings[str]);
                 else
-                    writer.Write(pos - stringOffsets[i]);
+                    writer.Write(writtenStrings[str] - stringOffsets[i]);
             }
 
             //Console.WriteLine("Insetings value offsets");
@@ -442,23 +479,36 @@ namespace KirbyYAML
                     }
                 case "Dictionary":
                     {
+                        TreeNode[] sortedNodes = new TreeNode[node.Nodes.Count];
+                        node.Nodes.CopyTo(sortedNodes, 0);
+                        sortedNodes = sortedNodes.OrderBy(x => x.Text).ToArray();
+
                         writer.Write(5);
-                        writer.Write(node.Nodes.Count);
+                        writer.Write(sortedNodes.Length);
                         uint pos = (uint)writer.BaseStream.Position;
-                        for (int i = 0; i < node.Nodes.Count; i++)
+                        for (int i = 0; i < sortedNodes.Length; i++)
                         {
-                            writer.Write(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+                            writer.Write(0);
+                            writer.Write(0);
                         }
-                        for (int i = 0; i < node.Nodes.Count; i++)
+
+                        if (yamlVersion >= 5)
                         {
-                            writer.BaseStream.Seek(pos, SeekOrigin.Begin);
-                            strings.Add(node.Nodes[i].Text);
+                            for (int i = 0; i < node.Nodes.Count; i++)
+                                writer.Write(sortedNodes.ToList().IndexOf(node.Nodes[i]));
+                        }
+
+                        for (int i = 0; i < sortedNodes.Length; i++)
+                        {
+                            writer.BaseStream.Seek(pos + (i * 8), SeekOrigin.Begin);
+                            strings.Add(sortedNodes[i].Text);
                             stringOffsets.Add((uint)writer.BaseStream.Position);
+
                             writer.BaseStream.Seek(0x4, SeekOrigin.Current);
                             valuePointers.Add((uint)writer.BaseStream.Position);
-                            writer.BaseStream.Seek(0x4, SeekOrigin.Current);
-                            pos = (uint)writer.BaseStream.Position;
-                            SaveYAMLNode(writer, node.Nodes[i]);
+
+                            writer.BaseStream.Seek(0x0, SeekOrigin.End);
+                            SaveYAMLNode(writer, sortedNodes[i]);
                         }
                         break;
                     }

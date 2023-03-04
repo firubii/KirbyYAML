@@ -333,7 +333,8 @@ namespace KirbyYAML
             {
                 TreeNode[] sortedNodes = new TreeNode[itemList.Nodes.Count];
                 itemList.Nodes.CopyTo(sortedNodes, 0);
-                sortedNodes = sortedNodes.OrderBy(x => x.Text).ToArray();
+                if (yamlVersion >= 5)
+                    sortedNodes = sortedNodes.OrderBy(x => x.Text).ToArray();
 
                 writer.Write(itemList.Nodes.Count);
                 uint pos = (uint)writer.BaseStream.Position;
@@ -481,7 +482,8 @@ namespace KirbyYAML
                     {
                         TreeNode[] sortedNodes = new TreeNode[node.Nodes.Count];
                         node.Nodes.CopyTo(sortedNodes, 0);
-                        sortedNodes = sortedNodes.OrderBy(x => x.Text).ToArray();
+                        if (yamlVersion >= 5)
+                            sortedNodes = sortedNodes.OrderBy(x => x.Text).ToArray();
 
                         writer.Write(5);
                         writer.Write(sortedNodes.Length);

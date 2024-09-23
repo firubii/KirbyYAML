@@ -28,105 +28,106 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.type = new System.Windows.Forms.ComboBox();
-            this.label4 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.value = new System.Windows.Forms.TextBox();
-            this.name = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.save = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            type = new System.Windows.Forms.ComboBox();
+            label4 = new System.Windows.Forms.Label();
+            label3 = new System.Windows.Forms.Label();
+            value = new System.Windows.Forms.TextBox();
+            name = new System.Windows.Forms.TextBox();
+            label2 = new System.Windows.Forms.Label();
+            save = new System.Windows.Forms.Button();
+            SuspendLayout();
             // 
             // type
             // 
-            this.type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.type.FormattingEnabled = true;
-            this.type.Items.AddRange(new object[] {
-            "Int",
-            "Float",
-            "Bool",
-            "String",
-            "Dictionary",
-            "List"});
-            this.type.Location = new System.Drawing.Point(16, 104);
-            this.type.Name = "type";
-            this.type.Size = new System.Drawing.Size(206, 21);
-            this.type.TabIndex = 15;
+            type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            type.FormattingEnabled = true;
+            type.Items.AddRange(new object[] { "Invalid", "Int", "Float", "Bool", "String", "Hash", "Array" });
+            type.Location = new System.Drawing.Point(19, 120);
+            type.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            type.Name = "type";
+            type.Size = new System.Drawing.Size(240, 23);
+            type.TabIndex = 15;
             // 
             // label4
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(12, 87);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(31, 13);
-            this.label4.TabIndex = 14;
-            this.label4.Text = "Type";
+            label4.AutoSize = true;
+            label4.Location = new System.Drawing.Point(14, 100);
+            label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label4.Name = "label4";
+            label4.Size = new System.Drawing.Size(31, 15);
+            label4.TabIndex = 14;
+            label4.Text = "Type";
             // 
             // label3
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 9);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(35, 13);
-            this.label3.TabIndex = 13;
-            this.label3.Text = "Name";
+            label3.AutoSize = true;
+            label3.Location = new System.Drawing.Point(14, 10);
+            label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label3.Name = "label3";
+            label3.Size = new System.Drawing.Size(39, 15);
+            label3.TabIndex = 13;
+            label3.Text = "Name";
             // 
             // value
             // 
-            this.value.Location = new System.Drawing.Point(15, 64);
-            this.value.Name = "value";
-            this.value.Size = new System.Drawing.Size(207, 20);
-            this.value.TabIndex = 12;
-            this.value.Text = "0";
+            value.Location = new System.Drawing.Point(18, 74);
+            value.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            value.Name = "value";
+            value.Size = new System.Drawing.Size(241, 23);
+            value.TabIndex = 12;
+            value.Text = "0";
             // 
             // name
             // 
-            this.name.Location = new System.Drawing.Point(15, 25);
-            this.name.Name = "name";
-            this.name.Size = new System.Drawing.Size(207, 20);
-            this.name.TabIndex = 11;
-            this.name.Text = "New Item";
+            name.Location = new System.Drawing.Point(18, 29);
+            name.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            name.Name = "name";
+            name.Size = new System.Drawing.Size(241, 23);
+            name.TabIndex = 11;
+            name.Text = "New Item";
             // 
             // label2
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(13, 48);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(34, 13);
-            this.label2.TabIndex = 10;
-            this.label2.Text = "Value";
+            label2.AutoSize = true;
+            label2.Location = new System.Drawing.Point(15, 55);
+            label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            label2.Name = "label2";
+            label2.Size = new System.Drawing.Size(35, 15);
+            label2.TabIndex = 10;
+            label2.Text = "Value";
             // 
             // save
             // 
-            this.save.Location = new System.Drawing.Point(81, 131);
-            this.save.Name = "save";
-            this.save.Size = new System.Drawing.Size(75, 23);
-            this.save.TabIndex = 16;
-            this.save.Text = "Save";
-            this.save.UseVisualStyleBackColor = true;
-            this.save.Click += new System.EventHandler(this.save_Click);
+            save.Location = new System.Drawing.Point(94, 151);
+            save.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            save.Name = "save";
+            save.Size = new System.Drawing.Size(88, 27);
+            save.TabIndex = 16;
+            save.Text = "Save";
+            save.UseVisualStyleBackColor = true;
+            save.Click += save_Click;
             // 
             // AddItem
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(242, 165);
-            this.Controls.Add(this.save);
-            this.Controls.Add(this.type);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.value);
-            this.Controls.Add(this.name);
-            this.Controls.Add(this.label2);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "AddItem";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Add Item";
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            ClientSize = new System.Drawing.Size(282, 190);
+            Controls.Add(save);
+            Controls.Add(type);
+            Controls.Add(label4);
+            Controls.Add(label3);
+            Controls.Add(value);
+            Controls.Add(name);
+            Controls.Add(label2);
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "AddItem";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            Text = "Add Item";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

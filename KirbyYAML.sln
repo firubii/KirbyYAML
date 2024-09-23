@@ -1,9 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27004.2005
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34302.71
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KirbyYAML", "KirbyYAML\KirbyYAML.csproj", "{F765A7AA-65FF-4B65-BC13-F7BC2E998A64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KirbyYAML", "KirbyYAML\KirbyYAML.csproj", "{F765A7AA-65FF-4B65-BC13-F7BC2E998A64}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KirbyLib", "KirbyLib\KirbyLib\KirbyLib.csproj", "{A7B03770-05F5-44EF-8660-9900AD54C108}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{F765A7AA-65FF-4B65-BC13-F7BC2E998A64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F765A7AA-65FF-4B65-BC13-F7BC2E998A64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F765A7AA-65FF-4B65-BC13-F7BC2E998A64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A7B03770-05F5-44EF-8660-9900AD54C108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A7B03770-05F5-44EF-8660-9900AD54C108}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A7B03770-05F5-44EF-8660-9900AD54C108}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A7B03770-05F5-44EF-8660-9900AD54C108}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

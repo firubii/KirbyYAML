@@ -17,7 +17,6 @@ using KirbyLib;
 using KirbyLib.IO;
 using YamlDotNet.Core.Events;
 using System.Runtime.InteropServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KirbyYAML
 {

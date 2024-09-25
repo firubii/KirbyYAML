@@ -15,15 +15,25 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using KirbyLib;
 using KirbyLib.IO;
+using YamlDotNet.Core.Events;
+using System.Runtime.InteropServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace KirbyYAML
 {
     public partial class MainForm : Form
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool AllocConsole();
+
         public MainForm()
         {
             InitializeComponent();
+            AllocConsole();
         }
+
+
 
         string filePath = "";
 
@@ -280,61 +290,177 @@ namespace KirbyYAML
         private void dumpToYAMLToolStripMenuItem_Click(object sender, EventArgs e)
         {
             SaveFileDialog save = new SaveFileDialog();
-            save.Filter = "YAML Text Files|*.yaml";
+            save.Filter = "YAML Text Files|*.yml";
             save.AddExtension = true;
-            save.DefaultExt = ".yaml";
-            save.FileName = Path.GetFileNameWithoutExtension(filePath) + ".yaml";
+            save.DefaultExt = ".yml";
+            save.FileName = Path.GetFileNameWithoutExtension(filePath) + ".yml";
             if (save.ShowDialog() == DialogResult.OK)
             {
                 ToYaml(save.FileName);
             }
         }
 
-        void ToYaml(string filePath)
+        private void importYamlMenuItem_Click(object sender, EventArgs e)
         {
-            YamlDotNet.RepresentationModel.YamlDocument doc = new(YamlToText(yaml.Root));
-            using (StreamWriter stream = new StreamWriter(new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write)))
+            OpenFileDialog open = new OpenFileDialog();
+            open.Filter = "YAML Text Files|*.yml";
+            open.CheckFileExists = true;
+            open.FileName = Path.GetFileNameWithoutExtension(filePath) + ".yml";
+            if (open.ShowDialog() == DialogResult.OK)
             {
-                YamlDotNet.RepresentationModel.YamlStream str = new();
-                str.Add(doc);
-                str.Save(stream);
+                FromYaml(open.FileName);
             }
         }
-        YamlDotNet.RepresentationModel.YamlNode YamlToText(YamlNode node)
+
+        void ToYaml(string filePath)
+        {
+            using (StreamWriter stream = new StreamWriter(new FileStream(filePath, FileMode.Create, FileAccess.Write)))
+            {
+                YamlDotNet.Core.Emitter e = new(stream);
+                e.Emit(new StreamStart());
+                e.Emit(new DocumentStart());
+
+                e.Emit(new MappingStart());
+                e.Emit(new Scalar("XData")); e.Emit(new Scalar(yaml.XData.Version[0] + "." + yaml.XData.Version[1]));
+                e.Emit(new Scalar("Endianness")); e.Emit(new Scalar(yaml.XData.Endianness.ToString()));
+                e.Emit(new Scalar("Version")); e.Emit(new Scalar(yaml.Version.ToString()));
+
+                e.Emit(new Scalar("root"));
+                EmitYaml(e, yaml.Root);
+
+                e.Emit(new MappingEnd());
+
+                e.Emit(new DocumentEnd(false, YamlDotNet.Core.Mark.Empty, YamlDotNet.Core.Mark.Empty));
+                e.Emit(new StreamEnd());
+            }
+
+        }
+        void EmitYaml(YamlDotNet.Core.Emitter emitter, YamlNode node)
         {
             switch (node.Type)
             {
                 case YamlType.Hash:
-                    YamlDotNet.RepresentationModel.YamlMappingNode map = new();
+                    emitter.Emit(new MappingStart());
                     for (int i = 0; i < node.Length; i++)
                     {
                         YamlNode child = node[i];
                         if (child.Type == YamlType.Hash || child.Type == YamlType.Array)
-                            map.Add(node.Key(i), YamlToText(child));
+                        {
+                            emitter.Emit(new Scalar(node.Key(i)));
+                            EmitYaml(emitter, child);
+                        }
                         else
-                            map.Add(
-                                new YamlDotNet.RepresentationModel.YamlScalarNode(node.Key(i)),
-                                new YamlDotNet.RepresentationModel.YamlScalarNode(child.ToString()));
+                        {
+                            emitter.Emit(new Scalar(node.Key(i)));
+                            emitter.Emit(new Scalar(child.GetValue().ToString()));
+                        }
                     }
 
-                    return map;
+                    emitter.Emit(new MappingEnd());
+                    break;
                 case YamlType.Array:
-                    YamlDotNet.RepresentationModel.YamlSequenceNode seq = new();
+                    emitter.Emit(new SequenceStart(YamlDotNet.Core.AnchorName.Empty, YamlDotNet.Core.TagName.Empty, false, SequenceStyle.Block));
                     for (int i = 0; i < node.Length; i++)
                     {
                         YamlNode child = node[i];
                         if (child.Type == YamlType.Hash || child.Type == YamlType.Array)
-                            seq.Add(YamlToText(child));
+                            EmitYaml(emitter, child);
                         else
-                            seq.Add(new YamlDotNet.RepresentationModel.YamlScalarNode(child.ToString()));
+                            emitter.Emit(new Scalar(child.GetValue().ToString()));
                     }
 
-                    return seq;
+                    emitter.Emit(new SequenceEnd());
+                    break;
             }
-
-            return null;
         }
 
+        void FromYaml(string filePath)
+        {
+            yaml = new Yaml();
+
+            using (StreamReader stream = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read)))
+            {
+                YamlDotNet.Core.Parser p = new YamlDotNet.Core.Parser(stream);
+
+                while (p.MoveNext())
+                {
+                    if (p.Current is Scalar)
+                    {
+                        Scalar scalar = p.Current as Scalar;
+                        if (scalar.Value == "XData")
+                        {
+                            p.MoveNext();
+                            string[] ver = (p.Current as Scalar).Value.Split('.');
+
+                            yaml.XData.Version = new byte[]
+                            {
+                                byte.Parse(ver[0]),
+                                byte.Parse(ver[1])
+                            };
+                        }
+                        else if (scalar.Value == "Endianness")
+                        {
+                            p.MoveNext();
+                            yaml.XData.Endianness = Enum.Parse<Endianness>((p.Current as Scalar).Value);
+                        }
+                        else if (scalar.Value == "Version")
+                        {
+                            p.MoveNext();
+                            yaml.Version = uint.Parse((p.Current as Scalar).Value);
+                        }
+                        else if (scalar.Value == "root")
+                        {
+                            p.MoveNext();
+                            yaml.Root = ParseYaml(p);
+                        }
+                    }
+                }
+            }
+
+            UpdateTree();
+        }
+        YamlNode ParseYaml(YamlDotNet.Core.Parser parser)
+        {
+            if (parser.Current is MappingStart)
+            {
+                Dictionary<string, YamlNode> hash = new Dictionary<string, YamlNode>();
+                while (parser.MoveNext() && parser.Current is Scalar)
+                {
+                    string key = (parser.Current as Scalar).Value;
+
+                    parser.MoveNext();
+                    YamlNode value = ParseYaml(parser);
+
+                    hash.Add(key, value);
+                }
+
+                return new YamlNode(hash);
+            }
+            else if (parser.Current is SequenceStart)
+            {
+                List<YamlNode> array = new List<YamlNode>();
+                while (parser.MoveNext() && parser.Current is Scalar)
+                {
+                    array.Add(ParseYaml(parser));
+                }
+
+                return new YamlNode(array);
+            }
+            else if (parser.Current is Scalar)
+            {
+                Scalar scalar = parser.Current as Scalar;
+                if (bool.TryParse(scalar.Value, out bool b))
+                    return new YamlNode(b);
+                else if (int.TryParse(scalar.Value, out int i))
+                    return new YamlNode(i);
+                else if (float.TryParse(scalar.Value, out float f))
+                    return new YamlNode(f);
+                else
+                    return new YamlNode(scalar.Value);
+            }
+
+            return new YamlNode();
+        }
 
         private void exportToolStripMenuItem_Click(object sender, EventArgs e)
         {

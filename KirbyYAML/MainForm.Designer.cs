@@ -65,6 +65,7 @@
             label6 = new System.Windows.Forms.Label();
             label7 = new System.Windows.Forms.Label();
             endianness = new System.Windows.Forms.ComboBox();
+            importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             rClickOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)yamlVersion).BeginInit();
@@ -125,7 +126,7 @@
             // 
             xMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem, importToolStripMenuItem });
             xMLToolStripMenuItem.Name = "xMLToolStripMenuItem";
-            xMLToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
+            xMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             xMLToolStripMenuItem.Text = "XML";
             // 
             // exportToolStripMenuItem
@@ -146,7 +147,7 @@
             // 
             jSONToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem2, jsonImpotMenuItem });
             jSONToolStripMenuItem.Name = "jSONToolStripMenuItem";
-            jSONToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
+            jSONToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             jSONToolStripMenuItem.Text = "JSON";
             // 
             // exportToolStripMenuItem2
@@ -165,15 +166,15 @@
             // 
             // dumpToYAMLToolStripMenuItem
             // 
-            dumpToYAMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem1 });
+            dumpToYAMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem1, importToolStripMenuItem1 });
             dumpToYAMLToolStripMenuItem.Name = "dumpToYAMLToolStripMenuItem";
-            dumpToYAMLToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
+            dumpToYAMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             dumpToYAMLToolStripMenuItem.Text = "YAML";
             // 
             // exportToolStripMenuItem1
             // 
             exportToolStripMenuItem1.Name = "exportToolStripMenuItem1";
-            exportToolStripMenuItem1.Size = new System.Drawing.Size(108, 22);
+            exportToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
             exportToolStripMenuItem1.Text = "Export";
             exportToolStripMenuItem1.Click += dumpToYAMLToolStripMenuItem_Click;
             // 
@@ -381,6 +382,13 @@
             endianness.Size = new System.Drawing.Size(121, 23);
             endianness.TabIndex = 18;
             // 
+            // importToolStripMenuItem1
+            // 
+            importToolStripMenuItem1.Name = "importToolStripMenuItem1";
+            importToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            importToolStripMenuItem1.Text = "Import";
+            importToolStripMenuItem1.Click += importYamlMenuItem_Click;
+            // 
             // MainForm
             // 
             AllowDrop = true;
@@ -461,6 +469,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.ComboBox endianness;
+        private System.Windows.Forms.ToolStripMenuItem importToolStripMenuItem1;
     }
 }
 

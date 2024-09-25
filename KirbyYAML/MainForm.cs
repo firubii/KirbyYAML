@@ -22,17 +22,17 @@ namespace KirbyYAML
 {
     public partial class MainForm : Form
     {
+        /*
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
+        */
 
         public MainForm()
         {
             InitializeComponent();
-            AllocConsole();
+            //AllocConsole();
         }
-
-
 
         string filePath = "";
 

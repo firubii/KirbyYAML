@@ -490,9 +490,13 @@ namespace KirbyYAML
             xmlDoc = new XmlDocument();
 
             XmlNode rootNode = xmlDoc.CreateElement("yaml");
-            XmlAttribute xbinAttr = xmlDoc.CreateAttribute("xdata");
-            xbinAttr.Value = yaml.XData.Version[0] + "." + yaml.XData.Version[1];
-            rootNode.Attributes.Append(xbinAttr);
+            XmlAttribute xdataAttr = xmlDoc.CreateAttribute("xdata");
+            xdataAttr.Value = yaml.XData.Version[0] + "." + yaml.XData.Version[1];
+            rootNode.Attributes.Append(xdataAttr);
+
+            XmlAttribute endianAttr = xmlDoc.CreateAttribute("endianness");
+            endianAttr.Value = yaml.XData.Endianness.ToString();
+            rootNode.Attributes.Append(endianAttr);
 
             XmlAttribute verAttr = xmlDoc.CreateAttribute("version");
             verAttr.Value = yaml.Version.ToString();
@@ -559,6 +563,8 @@ namespace KirbyYAML
                     string[] xVer = root.Attributes["xdata"].Value.Split('.');
                     yaml.XData.Version = new byte[] { byte.Parse(xVer[0]), byte.Parse(xVer[1]) };
                 }
+                if (root.Attributes["endianness"] != null)
+                    yaml.XData.Endianness = Enum.Parse<Endianness>(root.Attributes["endianness"].Value);
                 if (root.Attributes["version"] != null)
                     yaml.Version = uint.Parse(root.Attributes["version"].Value);
 

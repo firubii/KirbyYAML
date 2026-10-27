@@ -44,6 +44,7 @@
             jsonImpotMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             dumpToYAMLToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             exportToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             label1 = new System.Windows.Forms.Label();
             itemList = new System.Windows.Forms.TreeView();
             imageList1 = new System.Windows.Forms.ImageList(components);
@@ -65,7 +66,6 @@
             label6 = new System.Windows.Forms.Label();
             label7 = new System.Windows.Forms.Label();
             endianness = new System.Windows.Forms.ComboBox();
-            importToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             menuStrip1.SuspendLayout();
             rClickOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)yamlVersion).BeginInit();
@@ -126,7 +126,7 @@
             // 
             xMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem, importToolStripMenuItem });
             xMLToolStripMenuItem.Name = "xMLToolStripMenuItem";
-            xMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            xMLToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             xMLToolStripMenuItem.Text = "XML";
             // 
             // exportToolStripMenuItem
@@ -147,7 +147,7 @@
             // 
             jSONToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem2, jsonImpotMenuItem });
             jSONToolStripMenuItem.Name = "jSONToolStripMenuItem";
-            jSONToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            jSONToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             jSONToolStripMenuItem.Text = "JSON";
             // 
             // exportToolStripMenuItem2
@@ -168,15 +168,22 @@
             // 
             dumpToYAMLToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] { exportToolStripMenuItem1, importToolStripMenuItem1 });
             dumpToYAMLToolStripMenuItem.Name = "dumpToYAMLToolStripMenuItem";
-            dumpToYAMLToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            dumpToYAMLToolStripMenuItem.Size = new System.Drawing.Size(105, 22);
             dumpToYAMLToolStripMenuItem.Text = "YAML";
             // 
             // exportToolStripMenuItem1
             // 
             exportToolStripMenuItem1.Name = "exportToolStripMenuItem1";
-            exportToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
+            exportToolStripMenuItem1.Size = new System.Drawing.Size(110, 22);
             exportToolStripMenuItem1.Text = "Export";
             exportToolStripMenuItem1.Click += dumpToYAMLToolStripMenuItem_Click;
+            // 
+            // importToolStripMenuItem1
+            // 
+            importToolStripMenuItem1.Name = "importToolStripMenuItem1";
+            importToolStripMenuItem1.Size = new System.Drawing.Size(110, 22);
+            importToolStripMenuItem1.Text = "Import";
+            importToolStripMenuItem1.Click += importYamlMenuItem_Click;
             // 
             // label1
             // 
@@ -207,11 +214,12 @@
             imageList1.TransparentColor = System.Drawing.Color.Transparent;
             imageList1.Images.SetKeyName(0, "null.png");
             imageList1.Images.SetKeyName(1, "int.png");
-            imageList1.Images.SetKeyName(2, "float.png");
-            imageList1.Images.SetKeyName(3, "bool.png");
-            imageList1.Images.SetKeyName(4, "string.png");
-            imageList1.Images.SetKeyName(5, "dict.png");
-            imageList1.Images.SetKeyName(6, "list.png");
+            imageList1.Images.SetKeyName(2, "ulong.png");
+            imageList1.Images.SetKeyName(3, "float.png");
+            imageList1.Images.SetKeyName(4, "bool.png");
+            imageList1.Images.SetKeyName(5, "string.png");
+            imageList1.Images.SetKeyName(6, "dict.png");
+            imageList1.Images.SetKeyName(7, "list.png");
             // 
             // label2
             // 
@@ -267,7 +275,7 @@
             type.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             type.Enabled = false;
             type.FormattingEnabled = true;
-            type.Items.AddRange(new object[] { "Invalid", "Int", "Float", "Bool", "String", "Hash", "Array" });
+            type.Items.AddRange(new object[] { "Invalid", "Int", "UInt64", "Float", "Bool", "String", "Hash", "Array" });
             type.Location = new System.Drawing.Point(300, 142);
             type.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             type.Name = "type";
@@ -320,7 +328,7 @@
             // yamlVersion
             // 
             yamlVersion.Location = new System.Drawing.Point(420, 480);
-            yamlVersion.Maximum = new decimal(new int[] { 5, 0, 0, 0 });
+            yamlVersion.Maximum = new decimal(new int[] { 6, 0, 0, 0 });
             yamlVersion.Minimum = new decimal(new int[] { 2, 0, 0, 0 });
             yamlVersion.Name = "yamlVersion";
             yamlVersion.Size = new System.Drawing.Size(120, 23);
@@ -381,13 +389,6 @@
             endianness.Name = "endianness";
             endianness.Size = new System.Drawing.Size(121, 23);
             endianness.TabIndex = 18;
-            // 
-            // importToolStripMenuItem1
-            // 
-            importToolStripMenuItem1.Name = "importToolStripMenuItem1";
-            importToolStripMenuItem1.Size = new System.Drawing.Size(180, 22);
-            importToolStripMenuItem1.Text = "Import";
-            importToolStripMenuItem1.Click += importYamlMenuItem_Click;
             // 
             // MainForm
             // 

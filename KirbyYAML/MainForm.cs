@@ -213,6 +213,12 @@ namespace KirbyYAML
                                 node.SetValue(o);
                             break;
                         }
+                    case YamlType.UInt64:
+                        {
+                            if (ulong.TryParse(value.Text, out ulong o))
+                                node.SetValue(o);
+                            break;
+                        }
                     case YamlType.Float:
                         {
                             if (float.TryParse(value.Text, out float o))
